@@ -55,8 +55,32 @@ class recommendation():
         scores.reverse()
         return scores[0:n]
 
+    def getRecommendations(self, person, similarity=sim_distance):
+        totals = {}
+        simSums = {}
+        for other in self.critics:
+            if other == person:
+                continue
+            sim = similarity(self, person, other)
+
+            if sim <= 0:
+                continue
+            for item in self.critics[other]:
+                if item not in self.critics[person] or self.critics[person] == 0:
+                    totals.setdefault(item, 0)
+                    totals[item] += self.critics[other][item]*sim
+
+                    simSums.setdefault(item, 0)
+                    simSums[item] += sim
+
+        rankings = [(totals[item]/simSums[item], item) for item in totals]
+        rankings.sort()
+        rankings.reverse()
+        return rankings
+
 
 if __name__ == '__main__':
     r = recommendation()
-    print r.sim_distance('Lisa Rose', 'Gene Seymour')
-    print r.topMatches('Lisa Rose', 3)
+    # print r.sim_distance('Lisa Rose', 'Gene Seymour')
+    # print r.topMatches('Lisa Rose', 3)
+    print r.getRecommendations('Toby')
